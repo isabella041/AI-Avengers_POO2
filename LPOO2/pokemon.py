@@ -12,12 +12,21 @@ class PokemonSorter:
             raise TypeError("La estrategia debe ser una instancia de SortingStrategy")
         self._strategy = strategy
 
-    def sort(self, data: List[Dict], column: str) -> List[Dict]:
-        """Ordena los datos según la estrategia seleccionada."""
+    def sort(self, data: List[Dict], column: str, reverse: bool = False) -> List[Dict]:
+        """Ordena los datos según la estrategia seleccionada.
+        
+        Parámetros:
+        - data: Lista de diccionarios con los datos de los Pokémon.
+        - column: Nombre de la columna por la que se quiere ordenar.
+        - reverse: Si es `True`, ordena de mayor a menor.
+        
+        Retorna:
+        - Lista ordenada de diccionarios.
+        """
         if not data:
             return []  # Retorna lista vacía si no hay datos
         
         if column not in data[0]:
             raise KeyError(f"La columna '{column}' no existe en los datos.")
 
-        return self._strategy.sort(data, column)
+        return self._strategy.sort(data, column, reverse)

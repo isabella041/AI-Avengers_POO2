@@ -2,7 +2,7 @@ from SortingStrategy import SortingStrategy
 from typing import List, Dict
 
 class CountingSort(SortingStrategy):
-    def sort(self, data: List[Dict], column: str) -> List[Dict]:
+    def sort(self, data: List[Dict], column: str, reverse: bool = False) -> List[Dict]:
         if not data:
             return []
         
@@ -25,13 +25,17 @@ class CountingSort(SortingStrategy):
         for value in column_values:
             count[value - min_val] += 1
         
-        # Acumular conteos
-        for i in range(1, len(count)):
-            count[i] += count[i - 1]
+        # Acumular conteos para posiciones finales en el array ordenado
+        if reverse:
+            for i in range(len(count) - 2, -1, -1):
+                count[i] += count[i + 1]
+        else:
+            for i in range(1, len(count)):
+                count[i] += count[i - 1]
         
         # Construir la lista ordenada sin modificar los datos originales
         for item in reversed(data):
-            index = int(item[column]) - min_val  # Se mantiene como int
+            index = int(item[column]) - min_val
             output[count[index] - 1] = item
             count[index] -= 1
         

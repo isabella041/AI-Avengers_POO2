@@ -25,21 +25,29 @@ class RadixSort(SortingStrategy):
 
         return output
 
-    def sort(self, data: List[Dict], column: str) -> List[Dict]:
+    def sort(self, data: List[Dict], column: str, reverse: bool = False) -> List[Dict]:
         """Ordena la lista de diccionarios usando Radix Sort."""
         if not data:
             return []
 
-        sorted_data = data[:]  # Copia de la lista original
+        # Verificar que la clave exista en todos los elementos
+        if any(column not in item for item in data):
+            raise KeyError(f"La clave '{column}' no existe en los datos.")
 
-        try:
-            max_val = max(abs(item[column]) for item in sorted_data)
-        except KeyError:
-            return sorted_data  # Retorna sin cambios si la clave no existe
+        # Separar números negativos y positivos
+        negatives = [item for item in data if item[column] < 0]
+        positives = [item for item in data if item[column] >= 0]
+
+        # Obtener el valor absoluto máximo
+        max_val = max(abs(item[column]) for item in data)
 
         exp = 1
         while max_val // exp > 0:
-            sorted_data = self.counting_sort(sorted_data, exp, column)
+            positives = self.counting_sort(positives, exp, column)
+            negatives = self.counting_sort(negatives, exp, column)
             exp *= 10
 
-        return sorted_data
+        # Unir negativos (orden inverso) y positivos
+        sorted_data = negatives[::-1] + positives
+
+        return sorted_data[::-1] if reverse else sorted_data

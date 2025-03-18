@@ -52,6 +52,15 @@ class PokemonSorterApp:
         self.column_choice = ttk.Combobox(root, values=["Peso", "Altura", "Experiencia"], state="readonly")
         self.column_choice.pack(pady=5)
 
+        # UI - Selección del orden
+        self.order_label = tk.Label(root, text="Seleccione el orden:", 
+                                    bg="#282c34", fg="white", font=("Helvetica", 12))
+        self.order_label.pack(pady=5)
+
+        self.order_choice = ttk.Combobox(root, values=["Ascendente", "Descendente"], state="readonly")
+        self.order_choice.pack(pady=5)
+        self.order_choice.current(0)  # Seleccionar "Ascendente" por defecto
+
         # Botón de ordenamiento
         self.sort_button = tk.Button(root, text="Ordenar", command=self.sort_data,
                                      bg="#61afef", fg="white", font=("Helvetica", 10, "bold"), relief="flat")
@@ -69,10 +78,15 @@ class PokemonSorterApp:
         """Ordena los datos según la selección del usuario."""
         method = self.sort_method.get()
         column = self.column_choice.get()
+        order = self.order_choice.get()  # Obtener el orden seleccionado
 
         if method and column:
             sorter = PokemonSorter(self.algorithms[method])
-            sorted_data = sorter.sort(self.data, column)
+
+            # Determinar si el orden es descendente
+            reverse = True if order == "Descendente" else False
+
+            sorted_data = sorter.sort(self.data, column, reverse)
 
             # Limpiar la tabla antes de insertar nuevos datos
             for row in self.tree.get_children():
@@ -82,10 +96,9 @@ class PokemonSorterApp:
             for pokemon in sorted_data:
                 self.tree.insert("", "end", values=(pokemon["Nombre"], pokemon["Peso"], pokemon["Altura"], pokemon["Experiencia"]))
         else:
-            print("Seleccione un método y una columna antes de ordenar.")
+            print("Seleccione un método, una columna y el orden antes de ordenar.")
 
 if __name__ == "__main__":
     root = tk.Tk()
     app = PokemonSorterApp(root)
     root.mainloop()
-    
