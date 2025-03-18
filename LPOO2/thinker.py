@@ -49,7 +49,7 @@ class PokemonSorterApp:
                                      bg="#282c34", fg="white", font=("Helvetica", 12))
         self.column_label.pack(pady=5)
 
-        self.column_choice = ttk.Combobox(root, values=["Nombre", "Peso", "Altura", "Experiencia"], state="readonly")
+        self.column_choice = ttk.Combobox(root, values=["Peso", "Altura", "Experiencia"], state="readonly")
         self.column_choice.pack(pady=5)
 
         # Botón de ordenamiento

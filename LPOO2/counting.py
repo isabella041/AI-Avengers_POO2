@@ -6,33 +6,33 @@ class CountingSort(SortingStrategy):
         if not data:
             return []
         
-        # Verificar si la columna contiene datos numéricos
+        # Extraer los valores de la columna sin modificar el diccionario original
         try:
-            for item in data:
-                item[column] = float(item[column])  # Convierte a float o usa int() si son enteros
+            column_values = [int(item[column]) for item in data]  # Convertir a int sin modificar data
         except ValueError:
             raise ValueError(f"CountingSort solo puede ordenar valores numéricos. La columna '{column}' contiene datos no numéricos.")
         
-        # Encontrar el valor máximo y mínimo en la columna
-        max_val = max(data, key=lambda x: x[column])[column]
-        min_val = min(data, key=lambda x: x[column])[column]
-        range_of_elements = int(max_val - min_val + 1)
+        # Encontrar el valor máximo y mínimo
+        max_val = max(column_values)
+        min_val = min(column_values)
+        range_of_elements = max_val - min_val + 1
         
         # Inicializar listas de conteo y salida
         count = [0] * range_of_elements
         output = [None] * len(data)
         
         # Contar la frecuencia de cada valor
-        for item in data:
-            count[int(item[column] - min_val)] += 1
+        for value in column_values:
+            count[value - min_val] += 1
         
         # Acumular conteos
         for i in range(1, len(count)):
             count[i] += count[i - 1]
         
-        # Construir salida ordenada
+        # Construir la lista ordenada sin modificar los datos originales
         for item in reversed(data):
-            output[count[int(item[column] - min_val)] - 1] = item
-            count[int(item[column] - min_val)] -= 1
+            index = int(item[column]) - min_val  # Se mantiene como int
+            output[count[index] - 1] = item
+            count[index] -= 1
         
         return output
