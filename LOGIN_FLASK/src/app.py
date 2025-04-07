@@ -31,9 +31,14 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user = User(0, request.form['username'], request.form['password'])
-        logged_user = ModelUser.login(db, user)
+        username_input = request.form['username'].strip()
+        password_input = request.form['password'].strip()
+        print(f"Contraseña ingresada en formulario (raw): '{request.form['password']}'")
+        print(f"Contraseña ingresada en formulario (strip): '{password_input}'")
 
+        user = User(0, username_input, password_input)
+        logged_user = ModelUser.login(db, user)
+        
         if logged_user is not None:
             login_user(logged_user)
             return redirect(url_for('home'))
@@ -42,6 +47,7 @@ def login():
             return render_template('auth/login.html')
 
     return render_template('auth/login.html')
+
 
 
 
