@@ -33,22 +33,84 @@ def login():
     if request.method == 'POST':
         username_input = request.form['username'].strip()
         password_input = request.form['password'].strip()
-        print(f"Contraseña ingresada en formulario (raw): '{request.form['password']}'")
-        print(f"Contraseña ingresada en formulario (strip): '{password_input}'")
 
         user = User(0, username_input, password_input)
         logged_user = ModelUser.login(db, user)
-        
+
         if logged_user is not None:
             login_user(logged_user)
+            flash("Inicio de sesión exitoso.", "success")
             return redirect(url_for('home'))
         else:
-            flash("Invalid username or password.")
+            flash("Nombre de usuario o contraseña incorrectos.", "danger")
             return render_template('auth/login.html')
 
     return render_template('auth/login.html')
 
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        fullname = request.form['fullname'].strip()
+        username = request.form['username'].strip()
+        password = request.form['password'].strip()
+
+        if not fullname or not username or not password:
+            flash('Todos los campos son obligatorios.', 'warning')
+            return render_template('auth/register.html')
+
+        from werkzeug.security import generate_password_hash
+
+        hashed_password = generate_password_hash(password)
+
+        cursor = db.connection.cursor()
+        cursor.execute("SELECT * FROM user WHERE username = %s", (username,))
+        existing_user = cursor.fetchone()
+
+        if existing_user:
+            flash('El nombre de usuario ya existe.', 'warning')
+            return render_template('auth/register.html')
+
+        try:
+            cursor.execute(
+                "INSERT INTO user (fullname, username, password) VALUES (%s, %s, %s)",
+                (fullname, username, hashed_password)
+            )
+            db.connection.commit()
+            flash('Usuario registrado correctamente. Ahora puedes iniciar sesión.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            print("Error al registrar:", e)
+            flash('Ocurrió un error al registrar el usuario.', 'danger')
+            return render_template('auth/register.html')
+
+    return render_template('auth/register.html')
+
+
+
+@app.route('/recover-password', methods=['GET', 'POST'])
+def recover_password():
+    if request.method == 'POST':
+        username = request.form['username'].strip()
+        new_password = request.form['new_password'].strip()
+
+        from werkzeug.security import generate_password_hash
+
+        hashed_password = generate_password_hash(new_password)
+
+        cursor = db.connection.cursor()
+        cursor.execute("SELECT * FROM user WHERE username = %s", (username,))
+        user = cursor.fetchone()
+
+        if user:
+            cursor.execute("UPDATE user SET password = %s WHERE username = %s", (hashed_password, username))
+            db.connection.commit()
+            flash('Contraseña actualizada correctamente. Ahora puedes iniciar sesión.', 'success')
+            return redirect(url_for('login'))
+        else:
+            flash('Usuario no encontrado.', 'danger')
+
+    return render_template('auth/recover_password.html')
 
 
 @app.route('/logout')
